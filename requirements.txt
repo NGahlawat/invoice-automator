@@ -1,0 +1,7 @@
+Flask
+pandas
+openpyxl
+Pillow
+playwright
+gunicorn
+beautifulsoup4

@@ -1,0 +1,30 @@
+# Python environments
+invoice_env/
+dissertation_env/
+venv/
+.env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# VS Code
+.vscode/
+
+# Nourish authentication
+nourish_session.json
+*nourish_session*.json
+
+# Private business/customer data
+data/
+uploads/
+output/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
