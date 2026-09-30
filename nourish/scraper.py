@@ -1,3 +1,4 @@
+import os
 import re
 import time
 
@@ -5,7 +6,9 @@ from datetime import datetime, timedelta
 from difflib import SequenceMatcher
 from pathlib import Path
 
+from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright
+from steel import Steel
 
 from nourish.api import extract_appointments
 from config import NOURISH_SESSION_FILE
@@ -13,6 +16,8 @@ from config import NOURISH_SESSION_FILE
 BASE_URL = (
     "https://passionrecruit.nourishcare.com"
 )
+
+load_dotenv()
 
 SESSION_FILE = (
     NOURISH_SESSION_FILE
@@ -332,184 +337,209 @@ def check_nourish_session():
 
 
 # --------------------------------------------------
-# RECONNECT SESSION
+# STEEL REMOTE LOGIN
 # --------------------------------------------------
 
-def reconnect_nourish_session(
-    status_callback=None
-):
+def get_steel_client():
+    api_key = os.getenv("STEEL_API_KEY")
+
+    if not api_key:
+        raise Exception(
+            "STEEL_API_KEY is missing. "
+            "Add it to the environment before reconnecting Nourish."
+        )
+
+    return (
+        Steel(steel_api_key=api_key),
+        api_key
+    )
+
+
+def start_steel_nourish_login():
+
+    client, api_key = get_steel_client()
+
+    session = client.sessions.create(
+        timeout=900000
+    )
 
     p = None
-    browser = None
-
-
-    def update(
-        message
-    ):
-
-        if status_callback:
-
-            status_callback(
-                message
-            )
-
 
     try:
 
-        update(
-            "Opening Nourish login..."
-        )
-
-
         p = sync_playwright().start()
 
-
-        browser = p.chromium.launch(
-            headless=False
+        browser = p.chromium.connect_over_cdp(
+            f"{session.websocket_url}&apiKey={api_key}"
         )
 
+        context = browser.contexts[0]
 
-        context = browser.new_context()
+        # Steel normally starts with one tab already open.
+        # Reuse that exact tab so the live viewer cannot
+        # remain focused on about:blank / 0.0.0.0.
+        if context.pages:
 
+            page = context.pages[0]
 
-        page = context.new_page()
+        else:
 
+            page = context.new_page()
 
         page.goto(
             BASE_URL,
             wait_until="domcontentloaded",
-            timeout=30000
+            timeout=45000
         )
 
+        page.bring_to_front()
 
-        update(
-            "Please log into Nourish "
-            "in the browser window."
+        # Close any extra tabs Steel may have opened.
+        for other_page in list(context.pages):
+
+            if other_page != page:
+
+                try:
+                    other_page.close()
+                except:
+                    pass
+
+        # Give the live viewer a moment to catch up.
+        page.wait_for_timeout(
+            1000
         )
 
-
-        timeout_seconds = 300
-
-        started = time.time()
-
-
-        while (
-            time.time()
-            - started
-            < timeout_seconds
-        ):
-
-            try:
-
-                # --------------------------------------
-                # SESSION LIMIT
-                # --------------------------------------
-
-                if session_limit_exceeded(
-                    page
-                ):
-
-                    update(
-                        "Nourish session limit exceeded. "
-                        "Please close another Nourish "
-                        "session, then try logging in again."
-                    )
-
-                    time.sleep(
-                        1
-                    )
-
-                    continue
-
-
-                # --------------------------------------
-                # REAL DASHBOARD
-                # --------------------------------------
-
-                if is_real_dashboard(
-                    page
-                ):
-
-                    update(
-                        "Login detected. "
-                        "Saving Nourish session..."
-                    )
-
-
-                    context.storage_state(
-                        path=SESSION_FILE
-                    )
-
-
-                    update(
-                        "Nourish connected."
-                    )
-
-
-                    time.sleep(
-                        1
-                    )
-
-
-                    return {
-                        "success": True,
-                        "message": (
-                            "Nourish connected."
-                        )
-                    }
-
-
-            except Exception:
-
-                pass
-
-
-            time.sleep(
-                1
-            )
-
-
         return {
-            "success": False,
-            "message": (
-                "Login timed out. "
-                "Please try again."
-            )
+            "session_id": session.id,
+            "websocket_url": session.websocket_url,
+            "debug_url": session.debug_url
         }
 
+    except:
 
-    except Exception as error:
-
-        return {
-            "success": False,
-            "message": str(
-                error
+        try:
+            client.sessions.release(
+                session.id
             )
-        }
+        except:
+            pass
 
+        raise
 
     finally:
-
-        if browser is not None:
-
-            try:
-
-                browser.close()
-
-            except:
-
-                pass
-
 
         if p is not None:
 
             try:
-
                 p.stop()
-
             except:
-
                 pass
+
+
+def complete_steel_nourish_login(
+    session_id,
+    websocket_url
+):
+    client, api_key = get_steel_client()
+    p = None
+
+    try:
+        p = sync_playwright().start()
+
+        browser = p.chromium.connect_over_cdp(
+            f"{websocket_url}&apiKey={api_key}"
+        )
+
+        if not browser.contexts:
+            return {
+                "success": False,
+                "message": "Steel browser context was not found."
+            }
+
+        context = browser.contexts[0]
+
+        pages = context.pages
+
+        if not pages:
+            return {
+                "success": False,
+                "message": "Steel browser page was not found."
+            }
+
+        page = None
+
+        for candidate in pages:
+            if "nourishcare.com" in candidate.url:
+                page = candidate
+                break
+
+        if page is None:
+            page = pages[0]
+
+        if session_limit_exceeded(page):
+            return {
+                "success": False,
+                "message": (
+                    "Nourish session limit exceeded. "
+                    "Close another Nourish session and try again."
+                )
+            }
+
+        if is_login_page(page):
+            return {
+                "success": False,
+                "message": (
+                    "Nourish is still on the login page. "
+                    "Finish logging in, then try again."
+                )
+            }
+
+        if not is_real_dashboard(page):
+            return {
+                "success": False,
+                "message": (
+                    "Nourish dashboard was not detected yet. "
+                    "Finish logging in, then try again."
+                )
+            }
+
+        Path(SESSION_FILE).parent.mkdir(
+            parents=True,
+            exist_ok=True
+        )
+
+        context.storage_state(
+            path=str(SESSION_FILE)
+        )
+
+        return {
+            "success": True,
+            "message": "Nourish connected."
+        }
+
+    except Exception as error:
+        return {
+            "success": False,
+            "message": str(error)
+        }
+
+    finally:
+        if p is not None:
+            try:
+                p.stop()
+            except Exception:
+                pass
+
+
+def release_steel_nourish_login(session_id):
+    if not session_id:
+        return
+
+    try:
+        client, _ = get_steel_client()
+        client.sessions.release(session_id)
+    except Exception:
+        pass
 
 
 # --------------------------------------------------
@@ -652,46 +682,316 @@ def get_nourish_users(
     if session_limit_exceeded(
         page
     ):
-
         raise Exception(
             "Nourish session limit exceeded."
         )
 
 
-    options = page.locator(
-        "#edit-user-search option"
+    # --------------------------------------------------
+    # OPEN CLIENTS PAGE
+    # --------------------------------------------------
+
+    page.goto(
+        f"{BASE_URL}/clients",
+        wait_until="domcontentloaded",
+        timeout=30000
+    )
+
+    try:
+        page.wait_for_load_state(
+            "networkidle",
+            timeout=10000
+        )
+    except Exception:
+        pass
+
+
+    if session_limit_exceeded(
+        page
+    ):
+        raise Exception(
+            "Nourish session limit exceeded."
+        )
+
+
+    if is_login_page(
+        page
+    ):
+        raise Exception(
+            "Nourish session has expired."
+        )
+
+
+    page.wait_for_selector(
+        "#edit-status-check",
+        timeout=15000
+    )
+
+    page.wait_for_selector(
+        "#client-list",
+        timeout=15000
     )
 
 
-    users = []
+    # --------------------------------------------------
+    # CLIENT STATUSES
+    # --------------------------------------------------
+
+    client_statuses = {
+        "Active": "19",
+        "Care Suspended Client": "26",
+        "Ex-Client": "6",
+        "Inactive": "20",
+        "No longer a client": "21",
+        "Deceased": "22"
+    }
 
 
-    for i in range(
-        options.count()
+    all_users = {}
+
+
+    # --------------------------------------------------
+    # READ CLIENTS CURRENTLY SHOWN
+    # --------------------------------------------------
+
+    def read_client_list(
+        client_status
     ):
 
-        option = options.nth(
-            i
+        clients = []
+
+        links = page.locator(
+            "#client-list a[href]"
         )
 
 
-        name = option.inner_text().strip()
-
-
-        value = option.get_attribute(
-            "value"
-        )
-
-
-        if (
-            name
-            and value
+        for i in range(
+            links.count()
         ):
 
-            users.append({
-                "name": name,
-                "id": value
-            })
+            link = links.nth(i)
+
+
+            try:
+                name = (
+                    link
+                    .inner_text()
+                    .strip()
+                )
+
+                href = (
+                    link
+                    .get_attribute(
+                        "href"
+                    )
+                    or ""
+                )
+
+            except Exception:
+                continue
+
+
+            if not name:
+                continue
+
+
+            # Ignore obvious non-client links.
+            if name.lower() in [
+                "edit",
+                "view",
+                "delete",
+                "roster",
+                "schedule"
+            ]:
+                continue
+
+
+            client_id = None
+
+
+            # --------------------------------------------------
+            # TRY TO GET ID FROM LINK
+            # --------------------------------------------------
+
+            patterns = [
+                r"/roster/(\d+)",
+                r"/clients?/(\d+)",
+                r"/user/(\d+)"
+            ]
+
+
+            for pattern in patterns:
+
+                match = re.search(
+                    pattern,
+                    href
+                )
+
+                if match:
+
+                    client_id = (
+                        match.group(1)
+                    )
+
+                    break
+
+
+            # --------------------------------------------------
+            # TRY DATA ATTRIBUTES IF LINK DID NOT CONTAIN ID
+            # --------------------------------------------------
+
+            if client_id is None:
+
+                try:
+
+                    client_id = (
+                        link.get_attribute(
+                            "data-client-id"
+                        )
+                        or link.get_attribute(
+                            "data-user-id"
+                        )
+                        or link.get_attribute(
+                            "data-uid"
+                        )
+                        or link.get_attribute(
+                            "data-id"
+                        )
+                    )
+
+                except Exception:
+                    pass
+
+
+            if (
+                name
+                and client_id
+            ):
+
+                clients.append({
+                    "name": name,
+                    "id": str(
+                        client_id
+                    ),
+                    "client_status": (
+                        client_status
+                    )
+                })
+
+
+        return clients
+
+
+    # --------------------------------------------------
+    # CHECK EACH STATUS
+    # --------------------------------------------------
+
+    for (
+        status_name,
+        status_value
+    ) in client_statuses.items():
+
+        status_select = page.locator(
+            "#edit-status-check"
+        )
+
+
+        # Remember the current client list so we can
+        # detect when AJAX refreshes it.
+        old_html = ""
+
+        try:
+            old_html = page.locator(
+                "#client-list"
+            ).inner_html()
+        except Exception:
+            pass
+
+
+        status_select.select_option(
+            value=status_value
+        )
+
+
+        # The Nourish status selector is AJAX processed.
+        # select_option triggers the change event.
+        try:
+
+            page.wait_for_function(
+                """
+                oldHtml => {
+                    const list =
+                        document.querySelector(
+                            '#client-list'
+                        );
+
+                    if (!list) {
+                        return false;
+                    }
+
+                    return (
+                        list.innerHTML !== oldHtml
+                    );
+                }
+                """,
+                old_html,
+                timeout=10000
+            )
+
+        except Exception:
+
+            # Some status changes may produce identical
+            # HTML or update very quickly.
+            page.wait_for_timeout(
+                1500
+            )
+
+
+        if session_limit_exceeded(
+            page
+        ):
+            raise Exception(
+                "Nourish session limit exceeded."
+            )
+
+
+        users = read_client_list(
+            status_name
+        )
+
+
+        print(
+            f"Nourish {status_name}: "
+            f"{len(users)} clients found"
+        )
+
+
+        for user in users:
+
+            user_id = str(
+                user["id"]
+            )
+
+
+            if (
+                user_id
+                not in all_users
+            ):
+
+                all_users[
+                    user_id
+                ] = user
+
+
+    users = list(
+        all_users.values()
+    )
+
+
+    print(
+        "Total Nourish clients found:",
+        len(users)
+    )
 
 
     return users
@@ -865,11 +1165,42 @@ def get_roster(
     # OPEN CLIENT ROSTER
     # --------------------------------------------------
 
-    page.goto(
-        f"{BASE_URL}/roster/{client_id}",
-        wait_until="domcontentloaded",
-        timeout=30000
+    roster_url = (
+        f"{BASE_URL}/roster/{client_id}"
     )
+
+    last_error = None
+
+    for attempt in range(3):
+
+        try:
+
+            page.goto(
+                roster_url,
+                wait_until="domcontentloaded",
+                timeout=45000
+            )
+
+            last_error = None
+            break
+
+        except Exception as error:
+
+            last_error = error
+
+            if attempt < 2:
+
+                page.wait_for_timeout(
+                    2000
+                )
+
+    if last_error is not None:
+
+        raise Exception(
+            "Could not open Nourish roster after "
+            "3 attempts: "
+            + str(last_error)
+        )
 
 
     # --------------------------------------------------

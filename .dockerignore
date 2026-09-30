@@ -17,3 +17,4 @@ output/*
 nourish_session.json
 
 *.log
+.env

@@ -1,125 +1,51 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>
-        Invoice Automator
-    </title>
-
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='style.css') }}"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Automator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
-
 <body>
-
 <div class="page">
-
-
-    <!-- HEADER -->
-
     <header class="header">
-
-        <p class="small-heading">
-            PASSION RECRUITMENT AGENCY
-        </p>
-
-        <h1>
-            Invoice Automator
-        </h1>
-
-        <p class="subtitle">
-            Generate and validate monthly care invoices.
-        </p>
-
+        <p class="small-heading">PASSION RECRUITMENT AGENCY</p>
+        <h1>Invoice Automator</h1>
+        <p class="subtitle">Generate and validate monthly care invoices.</p>
     </header>
 
-
-    <!-- NOURISH STATUS -->
-
     <section class="card">
-
-        <h2>
-            Nourish Connection
-        </h2>
-
-
+        <h2>Nourish Connection</h2>
         <p>
-
             Status:
-
-            <span
-                id="nourish-status"
-                class="badge badge-neutral"
-            >
-                Checking...
-            </span>
-
+            <span id="nourish-status" class="badge badge-neutral">Checking...</span>
         </p>
-
-
-        <p
-            id="nourish-message"
-            class="description"
-        >
-            Checking saved Nourish session...
-        </p>
-
-
-        <button
-            id="reconnect-button"
-            type="button"
-            class="run-button"
-            style="display: none;"
-        >
-            Reconnect Nourish
+        <p id="nourish-message" class="description">Checking Nourish session...</p>
+        <button id="reconnect-button" type="button" class="run-button" style="display:none;">
+            Connect to Nourish
         </button>
-
     </section>
 
-
-    <!-- RUN INVOICES -->
-
     <section class="card">
-
-        <h2>
-            Run Monthly Invoices
-        </h2>
-
-
+        <h2>Run Monthly Invoices</h2>
         <p class="description">
-
-            Upload the monthly accounts workbook,
-            select the invoice month and year,
+            Upload the monthly accounts workbook, select the invoice month and year,
             then run the invoice process.
-
         </p>
 
+        <div class="template-download-box">
+            <div>
+                <strong>Need a fresh accounts template?</strong>
+                <p>Download the standard workbook with example data only. Replace the example rows with the service users you want to invoice.</p>
+            </div>
+            <a class="template-download-button" href="/download-template">
+                Download Accounts Template
+            </a>
+        </div>
 
-        <form
-            id="invoice-form"
-            class="invoice-form"
-            enctype="multipart/form-data"
-        >
-
+        <form id="invoice-form" class="invoice-form" enctype="multipart/form-data">
             <div class="form-field">
-
-                <label for="accounts_file">
-                    Monthly Accounts Workbook
-                </label>
-
+                <label for="accounts_file">Monthly Accounts Workbook</label>
                 <input
                     type="file"
                     id="accounts_file"
@@ -127,83 +53,28 @@
                     accept=".xlsx"
                     required
                 >
-
             </div>
 
-
             <div class="form-field">
-
-                <label for="month">
-                    Month
-                </label>
-
-                <select
-                    name="month"
-                    id="month"
-                >
-
-                    <option value="1">
-                        January
-                    </option>
-
-                    <option value="2">
-                        February
-                    </option>
-
-                    <option value="3">
-                        March
-                    </option>
-
-                    <option value="4">
-                        April
-                    </option>
-
-                    <option value="5">
-                        May
-                    </option>
-
-                    <option value="6">
-                        June
-                    </option>
-
-                    <option value="7">
-                        July
-                    </option>
-
-                    <option
-                        value="8"
-                        selected
-                    >
-                        August
-                    </option>
-
-                    <option value="9">
-                        September
-                    </option>
-
-                    <option value="10">
-                        October
-                    </option>
-
-                    <option value="11">
-                        November
-                    </option>
-
-                    <option value="12">
-                        December
-                    </option>
-
+                <label for="month">Month</label>
+                <select name="month" id="month">
+                    <option value="1">January</option>
+                    <option value="2">February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9" selected>September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
                 </select>
-
             </div>
 
-
             <div class="form-field">
-
-                <label for="year">
-                    Year
-                </label>
-
+                <label for="year">Year</label>
                 <input
                     type="number"
                     id="year"
@@ -213,1157 +84,434 @@
                     max="2100"
                     required
                 >
-
             </div>
-
 
             <div class="button-container">
-
-                <button
-                    id="run-button"
-                    type="submit"
-                    class="run-button"
-                    disabled
-                >
+                <button id="run-button" type="submit" class="run-button" disabled>
                     Checking Nourish...
                 </button>
-
             </div>
-
         </form>
 
-
-        <!-- LOGIN WARNING -->
-
-        <div
-            id="login-warning"
-            style="
-                display: none;
-                margin-top: 20px;
-                padding: 15px;
-                border-radius: 8px;
-                background: #fff4dd;
-                border: 1px solid #e59a18;
-            "
-        >
-
-            <strong>
-                Nourish login required
-            </strong>
-
-            <p
-                style="
-                    margin-top: 7px;
-                    margin-bottom: 0;
-                "
-            >
-                Reconnect Nourish before running invoices.
-            </p>
-
+        <div id="login-warning" class="login-warning" style="display:none;">
+            <strong>Nourish login required</strong>
+            <p>Connect to Nourish before running invoices.</p>
         </div>
-
     </section>
 
-
-    <!-- PROGRESS -->
-
-    <section
-        id="progress-section"
-        class="card"
-        style="display: none;"
-    >
-
-        <h2>
-            Processing
-        </h2>
-
-
-        <p id="progress-message">
-            Preparing...
-        </p>
-
-
-        <div
-            style="
-                width: 100%;
-                height: 20px;
-                background: #e4e7ec;
-                border-radius: 10px;
-                overflow: hidden;
-            "
-        >
-
-            <div
-                id="progress-bar"
-                style="
-                    height: 100%;
-                    width: 0%;
-                    background: #17699c;
-                    transition: width 0.3s ease;
-                "
-            >
-            </div>
-
+    <section id="progress-section" class="card" style="display:none;">
+        <h2>Processing</h2>
+        <p id="progress-message">Preparing...</p>
+        <div class="progress-track">
+            <div id="progress-bar" class="progress-bar"></div>
         </div>
-
-
-        <p
-            id="progress-percent"
-            style="margin-top: 10px;"
-        >
-            0%
-        </p>
-
+        <p id="progress-percent">0%</p>
     </section>
 
-
-    <!-- ERROR -->
-
-    <section
-        id="error-section"
-        class="error-card"
-        style="display: none;"
-    >
-
-        <h2>
-            Run Failed
-        </h2>
-
-        <p id="error-message">
-        </p>
-
+    <section id="error-section" class="error-card" style="display:none;">
+        <h2>Run Failed</h2>
+        <p id="error-message"></p>
     </section>
 
-
-    <!-- RESULTS -->
-
-    <section
-        id="results-section"
-        style="display: none;"
-    >
-
+    <section id="results-section" style="display:none;">
         <div class="results-heading">
-
-            <p class="small-heading">
-                COMPLETED
-            </p>
-
-            <h2>
-                Invoice Run Summary
-            </h2>
-
-            <p id="invoice-period">
-            </p>
-
+            <p class="small-heading">COMPLETED</p>
+            <h2>Invoice Run Summary</h2>
+            <p id="invoice-period"></p>
         </div>
-
 
         <div class="summary-grid">
-
             <div class="summary-card">
-
-                <span
-                    class="summary-number"
-                    id="generated-count"
-                >
-                    0
-                </span>
-
-                <span class="summary-label">
-                    Invoices Generated
-                </span>
-
+                <span class="summary-number" id="generated-count">0</span>
+                <span class="summary-label">Invoices Generated</span>
             </div>
-
 
             <div class="summary-card success">
-
-                <span
-                    class="summary-number"
-                    id="validated-count"
-                >
-                    0
-                </span>
-
-                <span class="summary-label">
-                    Nourish Validated
-                </span>
-
+                <span class="summary-number" id="validated-count">0</span>
+                <span class="summary-label">Nourish Validated</span>
             </div>
-
 
             <div class="summary-card warning">
-
-                <span
-                    class="summary-number"
-                    id="review-count"
-                >
-                    0
-                </span>
-
-                <span class="summary-label">
-                    Needs Review
-                </span>
-
+                <span class="summary-number" id="review-count">0</span>
+                <span class="summary-label">Needs Review</span>
             </div>
-
 
             <div class="summary-card error-summary">
-
-                <span
-                    class="summary-number"
-                    id="exception-count"
-                >
-                    0
-                </span>
-
-                <span class="summary-label">
-                    Invoice Exceptions
-                </span>
-
+                <span class="summary-number" id="exception-count">0</span>
+                <span class="summary-label">Invoice Exceptions</span>
             </div>
-
         </div>
 
-
         <section class="card">
-
-            <h2>
-                Generated Invoices
-            </h2>
-
-
+            <h2>Generated Invoices</h2>
+            <div
+                id="download-all-container"
+                style="margin-bottom: 20px; display: none;"
+            >
+                <a
+                    id="download-all-invoices"
+                    class="download-link"
+                    href="#"
+                >
+                    Download All Invoices
+                </a>
+            </div>
             <div class="table-wrapper">
-
                 <table>
-
                     <thead>
-
                     <tr>
-
-                        <th>
-                            Service User
-                        </th>
-
-                        <th>
-                            Invoice Number
-                        </th>
-
-                        <th>
-                            Hours
-                        </th>
-
-                        <th>
-                            Total
-                        </th>
-
-                        <th>
-                            Nourish
-                        </th>
-
-                        <th>
-                            File
-                        </th>
-
+                        <th>Service User</th>
+                        <th>Invoice Number</th>
+                        <th>Hours</th>
+                        <th>Total</th>
+                        <th>Nourish</th>
+                        <th>File</th>
                     </tr>
-
                     </thead>
-
-
-                    <tbody id="invoice-table-body">
-                    </tbody>
-
+                    <tbody id="invoice-table-body"></tbody>
                 </table>
-
             </div>
-
         </section>
-
 
         <section class="card">
-
-            <h2>
-                Reports
-            </h2>
-
-
+            <h2>Reports</h2>
             <div class="report-links">
-
-                <a href="/download/validation_report.csv">
-                    Validation Report
-                </a>
-
-                <a href="/download/invoice_batch.csv">
-                    Invoice Batch Report
-                </a>
-
-                <a href="/download/invoice_exceptions.csv">
-                    Exceptions Report
-                </a>
-
+                <a href="/download/validation_report.csv">Validation Report</a>
+                <a href="/download/invoice_batch.csv">Invoice Batch Report</a>
+                <a href="/download/invoice_exceptions.csv">Exceptions Report</a>
             </div>
-
         </section>
-
     </section>
-
 </div>
 
+<div id="nourish-modal" class="nourish-modal" style="display:none;">
+    <div class="nourish-modal-card">
+        <div class="nourish-modal-header">
+            <div>
+                <h2>Log into Nourish</h2>
+                <p>
+                    Use the browser below to log in normally. When you reach the Nourish dashboard,
+                    click <strong>I've finished logging in</strong>.
+                </p>
+            </div>
+            <button id="cancel-login-button" class="secondary-button" type="button">Cancel</button>
+        </div>
+
+        <iframe
+            id="nourish-browser"
+            title="Nourish login browser"
+            class="nourish-browser"
+        ></iframe>
+
+        <div class="nourish-modal-actions">
+            <span id="login-modal-message"></span>
+            <button id="complete-login-button" type="button" class="run-button">
+                I've finished logging in
+            </button>
+        </div>
+    </div>
+</div>
 
 <script>
+    const form = document.getElementById("invoice-form");
+    const runButton = document.getElementById("run-button");
+    const reconnectButton = document.getElementById("reconnect-button");
+    const nourishStatus = document.getElementById("nourish-status");
+    const nourishMessage = document.getElementById("nourish-message");
+    const loginWarning = document.getElementById("login-warning");
 
-    // --------------------------------------------------
-    // ELEMENTS
-    // --------------------------------------------------
+    const modal = document.getElementById("nourish-modal");
+    const nourishBrowser = document.getElementById("nourish-browser");
+    const completeLoginButton = document.getElementById("complete-login-button");
+    const cancelLoginButton = document.getElementById("cancel-login-button");
+    const loginModalMessage = document.getElementById("login-modal-message");
 
-    const form =
-        document.getElementById(
-            "invoice-form"
-        );
+    const progressSection = document.getElementById("progress-section");
+    const progressBar = document.getElementById("progress-bar");
+    const progressMessage = document.getElementById("progress-message");
+    const progressPercent = document.getElementById("progress-percent");
+    const resultsSection = document.getElementById("results-section");
+    const errorSection = document.getElementById("error-section");
+    const errorMessage = document.getElementById("error-message");
 
-
-    const runButton =
-        document.getElementById(
-            "run-button"
-        );
-
-
-    const progressSection =
-        document.getElementById(
-            "progress-section"
-        );
-
-
-    const progressBar =
-        document.getElementById(
-            "progress-bar"
-        );
-
-
-    const progressMessage =
-        document.getElementById(
-            "progress-message"
-        );
-
-
-    const progressPercent =
-        document.getElementById(
-            "progress-percent"
-        );
-
-
-    const resultsSection =
-        document.getElementById(
-            "results-section"
-        );
-
-
-    const errorSection =
-        document.getElementById(
-            "error-section"
-        );
-
-
-    const errorMessage =
-        document.getElementById(
-            "error-message"
-        );
-
-
-    const nourishStatus =
-        document.getElementById(
-            "nourish-status"
-        );
-
-
-    const nourishMessage =
-        document.getElementById(
-            "nourish-message"
-        );
-
-
-    const reconnectButton =
-        document.getElementById(
-            "reconnect-button"
-        );
-
-
-    const loginWarning =
-        document.getElementById(
-            "login-warning"
-        );
-
-
-    // --------------------------------------------------
-    // NOURISH STATUS
-    // --------------------------------------------------
 
     async function checkNourish() {
-
         runButton.disabled = true;
-
-        runButton.textContent =
-            "Checking Nourish...";
-
+        runButton.textContent = "Checking Nourish...";
 
         try {
-
-            const response =
-                await fetch(
-                    "/nourish-status"
-                );
-
-
-            const data =
-                await response.json();
-
-
-            if (data.reconnecting) {
-
-                nourishStatus.textContent =
-                    "Connecting";
-
-                nourishStatus.className =
-                    "badge badge-warning";
-
-                nourishMessage.textContent =
-                    data.message;
-
-                reconnectButton.style.display =
-                    "none";
-
-                loginWarning.style.display =
-                    "none";
-
-                runButton.disabled =
-                    true;
-
-                runButton.textContent =
-                    "Waiting for Nourish";
-
-                return;
-
-            }
-
+            const response = await fetch("/nourish-status");
+            const data = await response.json();
 
             if (data.connected) {
-
-                nourishStatus.textContent =
-                    "Connected";
-
-                nourishStatus.className =
-                    "badge badge-success";
-
-                nourishMessage.textContent =
-                    data.message;
-
-                reconnectButton.style.display =
-                    "none";
-
-                loginWarning.style.display =
-                    "none";
-
-                runButton.disabled =
-                    false;
-
-                runButton.textContent =
-                    "Run Invoices";
-
+                nourishStatus.textContent = "Connected";
+                nourishStatus.className = "badge badge-success";
+                nourishMessage.textContent = data.message;
+                reconnectButton.style.display = "none";
+                loginWarning.style.display = "none";
+                runButton.disabled = false;
+                runButton.textContent = "Run Invoices";
+            } else {
+                nourishStatus.textContent = "Login Required";
+                nourishStatus.className = "badge badge-warning";
+                nourishMessage.textContent = data.message;
+                reconnectButton.style.display = "inline-block";
+                loginWarning.style.display = "block";
+                runButton.disabled = true;
+                runButton.textContent = "Connect to Nourish First";
             }
-
-            else {
-
-                nourishStatus.textContent =
-                    "Login Required";
-
-                nourishStatus.className =
-                    "badge badge-warning";
-
-                nourishMessage.textContent =
-                    data.message;
-
-                reconnectButton.style.display =
-                    "inline-block";
-
-                loginWarning.style.display =
-                    "block";
-
-                runButton.disabled =
-                    true;
-
-                runButton.textContent =
-                    "Reconnect Nourish First";
-
-            }
-
+        } catch (error) {
+            nourishStatus.textContent = "Unavailable";
+            nourishStatus.className = "badge badge-neutral";
+            nourishMessage.textContent = error.message;
+            reconnectButton.style.display = "inline-block";
+            loginWarning.style.display = "block";
+            runButton.disabled = true;
+            runButton.textContent = "Nourish Unavailable";
         }
-
-        catch (error) {
-
-            nourishStatus.textContent =
-                "Unavailable";
-
-            nourishStatus.className =
-                "badge badge-neutral";
-
-            nourishMessage.textContent =
-                error.message;
-
-            loginWarning.style.display =
-                "block";
-
-            runButton.disabled =
-                true;
-
-            runButton.textContent =
-                "Nourish Unavailable";
-
-        }
-
     }
 
 
-    // --------------------------------------------------
-    // RECONNECT
-    // --------------------------------------------------
-
-    reconnectButton.addEventListener(
-        "click",
-        async function() {
-
-            reconnectButton.disabled =
-                true;
-
-
-            reconnectButton.textContent =
-                "Opening Nourish...";
-
-
-            runButton.disabled =
-                true;
-
-
-            runButton.textContent =
-                "Waiting for Nourish";
-
-
-            loginWarning.style.display =
-                "none";
-
-
-            try {
-
-                const response =
-                    await fetch(
-                        "/reconnect-nourish",
-                        {
-                            method: "POST"
-                        }
-                    );
-
-
-                const data =
-                    await response.json();
-
-
-                nourishStatus.textContent =
-                    "Connecting";
-
-
-                nourishStatus.className =
-                    "badge badge-warning";
-
-
-                nourishMessage.textContent =
-                    data.message;
-
-
-                watchReconnect();
-
-            }
-
-            catch (error) {
-
-                nourishMessage.textContent =
-                    error.message;
-
-
-                reconnectButton.disabled =
-                    false;
-
-
-                reconnectButton.textContent =
-                    "Reconnect Nourish";
-
-            }
-
-        }
-    );
-
-
-    async function watchReconnect() {
+    reconnectButton.addEventListener("click", async function () {
+        reconnectButton.disabled = true;
+        reconnectButton.textContent = "Starting login...";
+        nourishMessage.textContent = "Starting secure Nourish login browser...";
 
         try {
-
-            const response =
-                await fetch(
-                    "/reconnect-status"
-                );
-
-
-            const data =
-                await response.json();
-
-
-            nourishMessage.textContent =
-                data.message;
-
-
-            if (
-                data.status
-                === "connected"
-            ) {
-
-                nourishStatus.textContent =
-                    "Connected";
-
-
-                nourishStatus.className =
-                    "badge badge-success";
-
-
-                reconnectButton.style.display =
-                    "none";
-
-
-                reconnectButton.disabled =
-                    false;
-
-
-                reconnectButton.textContent =
-                    "Reconnect Nourish";
-
-
-                loginWarning.style.display =
-                    "none";
-
-
-                runButton.disabled =
-                    false;
-
-
-                runButton.textContent =
-                    "Run Invoices";
-
-
-                return;
-
-            }
-
-
-            if (
-                data.status
-                === "error"
-            ) {
-
-                nourishStatus.textContent =
-                    "Login Required";
-
-
-                nourishStatus.className =
-                    "badge badge-warning";
-
-
-                reconnectButton.style.display =
-                    "inline-block";
-
-
-                reconnectButton.disabled =
-                    false;
-
-
-                reconnectButton.textContent =
-                    "Reconnect Nourish";
-
-
-                loginWarning.style.display =
-                    "block";
-
-
-                runButton.disabled =
-                    true;
-
-
-                runButton.textContent =
-                    "Reconnect Nourish First";
-
-
-                return;
-
-            }
-
-
-            setTimeout(
-                watchReconnect,
-                1000
-            );
-
-        }
-
-        catch (error) {
-
-            nourishMessage.textContent =
-                error.message;
-
-
-            reconnectButton.style.display =
-                "inline-block";
-
-
-            reconnectButton.disabled =
-                false;
-
-
-            reconnectButton.textContent =
-                "Reconnect Nourish";
-
-
-            loginWarning.style.display =
-                "block";
-
-
-            runButton.disabled =
-                true;
-
-
-            runButton.textContent =
-                "Reconnect Nourish First";
-
-        }
-
-    }
-
-
-    // --------------------------------------------------
-    // RUN INVOICES
-    // --------------------------------------------------
-
-    form.addEventListener(
-        "submit",
-        async function(event) {
-
-            event.preventDefault();
-
-
-            runButton.disabled =
-                true;
-
-
-            runButton.textContent =
-                "Processing...";
-
-
-            resultsSection.style.display =
-                "none";
-
-
-            errorSection.style.display =
-                "none";
-
-
-            progressSection.style.display =
-                "block";
-
-
-            progressBar.style.width =
-                "0%";
-
-
-            progressPercent.textContent =
-                "0%";
-
-
-            progressMessage.textContent =
-                "Starting invoice run...";
-
-
-            const formData =
-                new FormData(
-                    form
-                );
-
-
-            try {
-
-                const response =
-                    await fetch(
-                        "/run",
-                        {
-                            method: "POST",
-                            body: formData
-                        }
-                    );
-
-
-                const data =
-                    await response.json();
-
-
-                if (!response.ok) {
-
-                    if (
-                        data.login_required
-                    ) {
-
-                        nourishStatus.textContent =
-                            "Login Required";
-
-
-                        nourishStatus.className =
-                            "badge badge-warning";
-
-
-                        nourishMessage.textContent =
-                            data.error;
-
-
-                        reconnectButton.style.display =
-                            "inline-block";
-
-
-                        loginWarning.style.display =
-                            "block";
-
-
-                        runButton.disabled =
-                            true;
-
-
-                        runButton.textContent =
-                            "Reconnect Nourish First";
-
-                    }
-
-
-                    throw new Error(
-                        data.error
-                        || "Could not start invoice run."
-                    );
-
-                }
-
-
-                checkJobStatus(
-                    data.job_id
-                );
-
-            }
-
-            catch (error) {
-
-                showError(
-                    error.message
-                );
-
-            }
-
-        }
-    );
-
-
-    // --------------------------------------------------
-    // CHECK INVOICE JOB
-    // --------------------------------------------------
-
-    async function checkJobStatus(
-        jobId
-    ) {
-
-        try {
-
-            const response =
-                await fetch(
-                    "/status/"
-                    + jobId
-                );
-
-
-            const job =
-                await response.json();
-
+            const response = await fetch("/reconnect-nourish", {
+                method: "POST"
+            });
+
+            const data = await response.json();
 
             if (!response.ok) {
-
-                throw new Error(
-                    job.error
-                    || "Could not read job status."
-                );
-
+                throw new Error(data.error || "Could not start Nourish login.");
             }
 
+            nourishBrowser.src = data.viewer_url;
+            loginModalMessage.textContent = data.message || "";
+            modal.style.display = "flex";
 
-            progressBar.style.width =
-                job.progress
-                + "%";
-
-
-            progressPercent.textContent =
-                job.progress
-                + "%";
-
-
-            progressMessage.textContent =
-                job.message;
+        } catch (error) {
+            nourishMessage.textContent = error.message;
+            reconnectButton.disabled = false;
+            reconnectButton.textContent = "Connect to Nourish";
+        }
+    });
 
 
-            if (
-                job.status
-                === "complete"
-            ) {
+    completeLoginButton.addEventListener("click", async function () {
+        completeLoginButton.disabled = true;
+        completeLoginButton.textContent = "Checking login...";
+        loginModalMessage.textContent = "Checking Nourish dashboard...";
 
-                showResults(
-                    job.result
-                );
+        try {
+            const response = await fetch("/complete-nourish-login", {
+                method: "POST"
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || data.error || "Login was not detected yet.");
+            }
+
+            nourishBrowser.src = "about:blank";
+            modal.style.display = "none";
+            reconnectButton.disabled = false;
+            reconnectButton.textContent = "Connect to Nourish";
+            loginModalMessage.textContent = "";
+
+            await checkNourish();
+
+        } catch (error) {
+            loginModalMessage.textContent = error.message;
+            completeLoginButton.disabled = false;
+            completeLoginButton.textContent = "I've finished logging in";
+        }
+    });
 
 
+    cancelLoginButton.addEventListener("click", async function () {
+        await fetch("/cancel-nourish-login", {
+            method: "POST"
+        });
+
+        nourishBrowser.src = "about:blank";
+        modal.style.display = "none";
+        reconnectButton.disabled = false;
+        reconnectButton.textContent = "Connect to Nourish";
+        loginModalMessage.textContent = "";
+    });
+
+
+    form.addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        runButton.disabled = true;
+        runButton.textContent = "Processing...";
+        resultsSection.style.display = "none";
+        errorSection.style.display = "none";
+        progressSection.style.display = "block";
+        progressBar.style.width = "0%";
+        progressPercent.textContent = "0%";
+        progressMessage.textContent = "Starting invoice run...";
+
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch("/run", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                if (data.login_required) {
+                    nourishStatus.textContent = "Login Required";
+                    nourishStatus.className = "badge badge-warning";
+                    nourishMessage.textContent = data.error;
+                    reconnectButton.style.display = "inline-block";
+                    loginWarning.style.display = "block";
+                }
+
+                throw new Error(data.error || "Could not start invoice run.");
+            }
+
+            checkJobStatus(data.job_id);
+
+        } catch (error) {
+            showError(error.message);
+        }
+    });
+
+
+    async function checkJobStatus(jobId) {
+        try {
+            const response = await fetch("/status/" + jobId);
+            const job = await response.json();
+
+            if (!response.ok) {
+                throw new Error(job.error || "Could not read job status.");
+            }
+
+            progressBar.style.width = job.progress + "%";
+            progressPercent.textContent = job.progress + "%";
+            progressMessage.textContent = job.message;
+
+            if (job.status === "complete") {
+                showResults(job.result);
                 checkNourish();
-
-
                 return;
-
             }
 
-
-            if (
-                job.status
-                === "error"
-            ) {
-
-                showError(
-                    job.error
-                    || "Invoice run failed."
-                );
-
-
+            if (job.status === "error") {
+                showError(job.error || "Invoice run failed.");
                 return;
-
             }
 
+            setTimeout(function () {
+                checkJobStatus(jobId);
+            }, 1000);
 
-            setTimeout(
-                function() {
-
-                    checkJobStatus(
-                        jobId
-                    );
-
-                },
-                1000
-            );
-
+        } catch (error) {
+            showError(error.message);
         }
-
-        catch (error) {
-
-            showError(
-                error.message
-            );
-
-        }
-
     }
 
 
-    // --------------------------------------------------
-    // RESULTS
-    // --------------------------------------------------
+    function showResults(result) {
+        progressSection.style.display = "none";
+        errorSection.style.display = "none";
+        errorMessage.textContent = "";
+        resultsSection.style.display = "block";
 
-    function showResults(
-        result
-    ) {
+        nourishStatus.textContent = "Connected";
+        nourishStatus.className = "badge badge-success";
+        nourishMessage.textContent = "Connected to Nourish.";
+        reconnectButton.style.display = "none";
+        loginWarning.style.display = "none";
 
-        progressSection.style.display =
-            "none";
+        runButton.disabled = false;
+        runButton.textContent = "Run Invoices";
 
-
-        resultsSection.style.display =
-            "block";
-
-
-        runButton.disabled =
-            false;
-
-
-        runButton.textContent =
-            "Run Invoices";
-
-
-        document.getElementById(
-            "invoice-period"
-        ).textContent =
-            result.invoice_period;
-
-
-        document.getElementById(
-            "generated-count"
-        ).textContent =
-            result.generated_count;
-
-
-        document.getElementById(
-            "validated-count"
-        ).textContent =
-            result.validated_count;
-
-
-        document.getElementById(
-            "review-count"
-        ).textContent =
-            result.review_count;
-
-
-        document.getElementById(
-            "exception-count"
-        ).textContent =
-            result.exception_count;
-
-
-        const tableBody =
+        const downloadAllContainer =
             document.getElementById(
-                "invoice-table-body"
+                "download-all-container"
+            );
+
+        const downloadAllInvoices =
+            document.getElementById(
+                "download-all-invoices"
             );
 
 
-        tableBody.innerHTML =
-            "";
+        if (result.invoice_zip) {
 
+            downloadAllInvoices.href =
+                "/download/"
+                + result.invoice_zip;
 
-        result.generated.forEach(
-            function(invoice) {
+            downloadAllContainer.style.display =
+                "block";
 
-                const row =
-                    document.createElement(
-                        "tr"
-                    );
+        }
+        else {
 
+            downloadAllContainer.style.display =
+                "none";
 
-                let badgeClass =
-                    "badge-neutral";
+        }
 
+        document.getElementById("invoice-period").textContent = result.invoice_period;
+        document.getElementById("generated-count").textContent = result.generated_count;
+        document.getElementById("validated-count").textContent = result.validated_count;
+        document.getElementById("review-count").textContent = result.review_count;
+        document.getElementById("exception-count").textContent = result.exception_count;
 
-                if (
-                    invoice.nourish_validation
-                    === "VALIDATED"
-                ) {
+        const tableBody = document.getElementById("invoice-table-body");
+        tableBody.innerHTML = "";
 
-                    badgeClass =
-                        "badge-success";
+        result.generated.forEach(function (invoice) {
+            const row = document.createElement("tr");
+            let badgeClass = "badge-neutral";
 
-                }
-
-
-                else if (
-                    invoice.nourish_validation
-                    === "REVIEW"
-                ) {
-
-                    badgeClass =
-                        "badge-warning";
-
-                }
-
-
-                const filename =
-                    invoice.file
-                    .replaceAll(
-                        "\\",
-                        "/"
-                    )
-                    .split("/")
-                    .pop();
-
-
-                row.innerHTML = `
-                    <td>
-                        ${invoice.name}
-                    </td>
-
-                    <td>
-                        ${invoice.invoice_number}
-                    </td>
-
-                    <td>
-                        ${invoice.hours}
-                    </td>
-
-                    <td>
-                        £${invoice.total}
-                    </td>
-
-                    <td>
-                        <span class="badge ${badgeClass}">
-                            ${invoice.nourish_validation}
-                        </span>
-                    </td>
-
-                    <td>
-                        <a
-                            class="download-link"
-                            href="/download/${filename}"
-                        >
-                            Download
-                        </a>
-                    </td>
-                `;
-
-
-                tableBody.appendChild(
-                    row
-                );
-
+            if (invoice.nourish_validation === "VALIDATED") {
+                badgeClass = "badge-success";
+            } else if (invoice.nourish_validation === "REVIEW") {
+                badgeClass = "badge-warning";
             }
-        );
 
+            const filename = invoice.file
+                .replaceAll("\\", "/")
+                .split("/")
+                .pop();
+
+            row.innerHTML = `
+                <td>${invoice.name}</td>
+                <td>${invoice.invoice_number}</td>
+                <td>${invoice.hours}</td>
+                <td>£${Number(invoice.total).toFixed(2)}</td>
+                <td><span class="badge ${badgeClass}">${invoice.nourish_validation}</span></td>
+                <td><a class="download-link" href="/download/${filename}">Download</a></td>
+            `;
+
+            tableBody.appendChild(row);
+        });
     }
 
 
-    // --------------------------------------------------
-    // ERROR
-    // --------------------------------------------------
-
-    function showError(
-        message
-    ) {
-
-        progressSection.style.display =
-            "none";
-
-
-        resultsSection.style.display =
-            "none";
-
-
-        errorSection.style.display =
-            "block";
-
-
-        errorMessage.textContent =
-            message;
-
-
+    function showError(message) {
+        progressSection.style.display = "none";
+        resultsSection.style.display = "none";
+        errorSection.style.display = "block";
+        errorMessage.textContent = message;
         checkNourish();
-
     }
 
-
-    // --------------------------------------------------
-    // INITIAL CHECK
-    // --------------------------------------------------
 
     checkNourish();
-
 </script>
-
 </body>
-
 </html>

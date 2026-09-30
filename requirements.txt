@@ -5,3 +5,5 @@ Pillow
 playwright
 gunicorn
 beautifulsoup4
+steel-sdk
+python-dotenv
